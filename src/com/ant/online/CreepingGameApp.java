@@ -2,6 +2,8 @@ package com.ant.online;
 
 import com.ant.online.controller.RootLayoutController;
 import com.ant.online.model.Ant;
+import com.ant.online.model.CreepingGame;
+import com.ant.online.model.PlayRoom;
 import com.ant.online.model.Stick;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -24,14 +26,20 @@ public class CreepingGameApp extends Application {
     private Stick stick;
     private ObservableList<Ant> ants = FXCollections.observableArrayList();
 
+    private RootLayoutController rootLayoutController;
+
     public ObservableList<Ant> getAnts() {
         return ants;
     }
 
+    public Stick getStick() {
+        return stick;
+    }
+
     public CreepingGameApp() {
         // Add som sample data
-        this.stick = new Stick(600);
-        ants.add(new Ant(30, VELOCITY));
+        this.stick = new Stick(300);
+        ants.add(new Ant(0, VELOCITY));
         ants.add(new Ant(80, VELOCITY));
         ants.add(new Ant(110, VELOCITY));
         ants.add(new Ant(160, VELOCITY));
@@ -72,8 +80,8 @@ public class CreepingGameApp extends Application {
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
 
-            RootLayoutController controller = loader.getController();
-            controller.setCreepingGameApp(this);
+            rootLayoutController = loader.getController();
+            rootLayoutController.setCreepingGameApp(this);
 
             primaryStage.show();
         } catch (IOException e) {
@@ -88,6 +96,31 @@ public class CreepingGameApp extends Application {
     private void initUserPanel() {
 
         // TODO
+    }
+
+    public void startPlay(){
+        PlayRoom playRoom = new PlayRoom(ants, stick);
+        while (playRoom.hasNext()) {
+            CreepingGame creepingGame = playRoom.next();
+            while (!creepingGame.isGameOver()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+                try {
+                    creepingGame.nextTick();
+                    System.out.println("tick");
+                    rootLayoutController.changeAnts();
+                } catch (Exception e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private void tick() {
+
     }
 
     public static void main(String[] args) {

@@ -55,7 +55,7 @@
                </children></AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <Button layoutX="372.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleStart" text="开始" />
+                  <Button layoutX="379.0" layoutY="148.0" mnemonicParsing="false" onAction="#handleStart" text="开始" />
                </children></AnchorPane>
         </items>
       </SplitPane>
