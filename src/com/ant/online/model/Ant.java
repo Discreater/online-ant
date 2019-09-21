@@ -17,10 +17,10 @@ public class Ant implements Comparable<Ant>{
     private final IntegerProperty dropTime;
     private final BooleanProperty online;
 
-    public Ant(Integer position, Integer velocity, Boolean faceLeft) {
+    public Ant(Integer position, Integer velocity) {
         this.position = new SimpleIntegerProperty(position);
         this.velocity = new SimpleIntegerProperty(velocity);
-        this.faceLeft = new SimpleBooleanProperty(faceLeft);
+        this.faceLeft = new SimpleBooleanProperty(true);
 
         this.dropTime = new SimpleIntegerProperty(0);
         this.online = new SimpleBooleanProperty(true);

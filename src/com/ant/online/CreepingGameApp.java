@@ -1,7 +1,11 @@
 package com.ant.online;
 
 import com.ant.online.controller.RootLayoutController;
+import com.ant.online.model.Ant;
+import com.ant.online.model.Stick;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -12,8 +16,27 @@ import java.io.IOException;
 
 public class CreepingGameApp extends Application {
 
+    public static final int VELOCITY = 5;
     private Stage primaryStage;
     private BorderPane rootLayout;
+
+
+    private Stick stick;
+    private ObservableList<Ant> ants = FXCollections.observableArrayList();
+
+    public ObservableList<Ant> getAnts() {
+        return ants;
+    }
+
+    public CreepingGameApp() {
+        // Add som sample data
+        this.stick = new Stick(600);
+        ants.add(new Ant(30, VELOCITY));
+        ants.add(new Ant(80, VELOCITY));
+        ants.add(new Ant(110, VELOCITY));
+        ants.add(new Ant(160, VELOCITY));
+        ants.add(new Ant(250, VELOCITY));
+    }
 
     @Override
     public void start(Stage primaryStage){
@@ -63,6 +86,7 @@ public class CreepingGameApp extends Application {
     }
 
     private void initUserPanel() {
+
         // TODO
     }
 
