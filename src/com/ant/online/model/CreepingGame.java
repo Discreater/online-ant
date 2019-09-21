@@ -4,31 +4,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreepingGame {
+    protected List<Ant> ants;
+    protected Stick stick;
     private int tick = 0;
-    private int velocity = 1;
-    private List<Integer> initPositions;
-    private List<Boolean> initFacings;
-    private List<Ant> ants;
+    private int beginIndex;
+    private int endIndex;
 
-    public CreepingGame(PlayRoom playRoom, List<Boolean> facings) {
-        assert playRoom.positions.size() == facings.size();
-        this.initPositions = playRoom.positions;
-        this.initFacings = facings;
+    public CreepingGame(List<Ant> ants, Stick stick) {
+        this.ants=new ArrayList<>();
+        this.ants.addAll(ants);
+        this.stick=stick;
+        beginIndex=0;
+        endIndex=this.ants.size()-1;
     }
 
     public void init() {
-        this.ants = new ArrayList<>();
-        int velocity = this.velocity;
-        for (int i = 0; i < initPositions.size(); i++) {
-            Integer position = this.initPositions.get(i);
-            Boolean facing = this.initFacings.get(i);
-            Ant ant = new Ant(position, velocity, facing);
-            ants.add(ant);
+
+    }
+
+    public void start() {
+        init();
+        while (!isGameOver()) {
+            try {
+                System.out.println("In tick "+getTick());
+                this.nextTick();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        destroy();
     }
 
     public void destroy() {
 
+    }
+
+    public boolean isGameOver() {
+        return beginIndex>endIndex;
     }
 
     public int getTick() {
@@ -39,15 +51,17 @@ public class CreepingGame {
         this.tick = tick;
     }
 
-    public void nextTick() throws Exception{
-        this.tick++;
+    public List<Ant> nextTick() throws Exception{
+        this.setTick(this.tick+1);
         this.moveAll();
         this.bounceAll();
         this.turnBackAll();
+        this.dropAll();
+        return this.ants;
     }
 
     private void moveAll() {
-        for (int i = 0; i < this.ants.size(); i++) {
+        for (int i = beginIndex; i <= endIndex; i++) {
             Ant ant = this.ants.get(i);
             int position = ant.getPosition();
             if (ant.isFaceLeft()) {
@@ -59,7 +73,7 @@ public class CreepingGame {
     }
 
     private void bounceAll() throws Exception {
-        for (int i = 0; i < this.ants.size(); i++) {
+        for (int i = beginIndex; i <= endIndex; i++) {
             if (i < this.ants.size() - 1) {  // Not the last ant
                 Ant ant = ants.get(i);
                 Ant nextAnt = ants.get(i + 1);
@@ -79,7 +93,7 @@ public class CreepingGame {
     }
 
     private void turnBackAll() throws Exception {
-        for (int i = 0; i < this.ants.size(); i++) {
+        for (int i = beginIndex; i <= endIndex; i++) {
             if (i < this.ants.size() - 1) {
                 Ant ant = ants.get(i);
                 Ant nextAnt = ants.get(i + 1);
@@ -93,6 +107,19 @@ public class CreepingGame {
                 }
                 assert ant.compareTo(nextAnt) < 0;
             }
+        }
+    }
+
+    private void dropAll() {
+        Ant firstAnt=ants.get(beginIndex);
+        Ant lastAnt=ants.get(endIndex);
+        if (stick.onStick(firstAnt.getPosition())){
+            beginIndex++;
+            firstAnt.setOnline(false);
+        }
+        if(stick.onStick(lastAnt.getPosition())){
+            endIndex--;
+            lastAnt.setOnline(false);
         }
     }
 }
