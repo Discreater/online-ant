@@ -2,6 +2,8 @@ package com.ant.online.controller;
 
 import com.ant.online.CreepingGameApp;
 import com.ant.online.model.Ant;
+import com.ant.online.model.CreepingGame;
+import com.ant.online.model.PlayRoom;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,6 +16,9 @@ public class RootLayoutController {
     public static final double offset = 100.0;
     // Reference to the main application
     private CreepingGameApp creepingGameApp;
+
+    private CreepingGame currentCreepingGame=null;
+    private PlayRoom currentPlayingRoom=null;
 
     /**
      * Is called by the main application to give a reference back to itself.
@@ -33,8 +38,23 @@ public class RootLayoutController {
 
     @FXML
     private void handleStart() {
+        this.currentPlayingRoom = new PlayRoom(creepingGameApp.getAnts(), creepingGameApp.getStick());
+        currentCreepingGame=currentPlayingRoom.hasNext()? currentPlayingRoom.next():null;
         putAnts();
-        creepingGameApp.startPlay();
+    }
+
+    @FXML
+    private void handleNextTick() {
+        if (currentPlayingRoom.hasNext() &&(currentCreepingGame==null ||currentCreepingGame.isGameOver())){
+            this.currentCreepingGame=currentPlayingRoom.next();
+            putAnts();
+        }else if(!currentCreepingGame.isGameOver()){try {
+            currentCreepingGame.nextTick();
+            changeAnts();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }}
+
     }
 
     @FXML
@@ -43,7 +63,7 @@ public class RootLayoutController {
     private ImageView[] antsImages = new ImageView[5];
 
     private void putAnts() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < creepingGameApp.getAnts().size(); i++) {
             antsImages[i] = new ImageView(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
             antsImages[i].setFitWidth(35);
             antsImages[i].setPreserveRatio(true);
@@ -55,8 +75,8 @@ public class RootLayoutController {
     }
 
     public void changeAnts() {
-        for(int i =0; i < 5; i++){
-            if (creepingGameApp.getAnts().get(i).isOnline()) {
+        for(int i =0; i < creepingGameApp.getAnts().size(); i++){
+            if (!creepingGameApp.getAnts().get(i).isOnline()) {
                 antsImageLayout.getChildren().remove(antsImages[i]);
             } else {
                 AnchorPane.setLeftAnchor(antsImages[i], getTruePosition(creepingGameApp.getAnts().get(i)));

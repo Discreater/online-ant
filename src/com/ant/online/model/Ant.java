@@ -26,6 +26,17 @@ public class Ant implements Comparable<Ant>{
         this.online = new SimpleBooleanProperty(true);
     }
 
+    public Ant(Ant src) {
+        this.position = new SimpleIntegerProperty(0);
+        this.velocity = new SimpleIntegerProperty(0);
+        this.faceLeft = new SimpleBooleanProperty(true);
+
+        this.dropTime = new SimpleIntegerProperty(0);
+        this.online = new SimpleBooleanProperty(true);
+
+        Ant.copy(src,this);
+    }
+
     public int getPosition() {
         return position.get();
     }
@@ -107,5 +118,13 @@ public class Ant implements Comparable<Ant>{
 
     public void turnBack() {
         this.setFaceLeft(!this.isFaceLeft());
+    }
+
+    public static void copy(Ant src, Ant dst) {
+        dst.setFaceLeft(src.isFaceLeft());
+        dst.setOnline(src.isOnline());
+        dst.setPosition(src.getPosition());
+        dst.setVelocity(src.getVelocity());
+        dst.setDropTime(src.getDropTime());
     }
 }

@@ -1,9 +1,6 @@
 package com.ant.online.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class PlayRoom implements Iterator<CreepingGame> {
     private List<Ant> ants;
@@ -15,8 +12,11 @@ public class PlayRoom implements Iterator<CreepingGame> {
         this.ants = ants;
         this.stick = stick;
         Collections.sort(ants);
-        this.antsCopy = new ArrayList<>(ants);
-        //Collections.copy(antsCopy, ants);
+        this.antsCopy = new ArrayList<>();
+        for (int i = 0; i < ants.size(); i++) {
+            Ant ant = ants.get(i);
+            this.antsCopy.add(new Ant(ant));
+        }
         init();
     }
 
@@ -40,7 +40,14 @@ public class PlayRoom implements Iterator<CreepingGame> {
 
     @Override
     public CreepingGame next() {
-        Collections.copy(this.ants, this.antsCopy);
+        if (!hasNext) {
+            throw new NoSuchElementException();
+        }
+        for (int i = 0; i < ants.size(); i++) {
+            Ant ant = ants.get(i);
+            Ant antCopy = antsCopy.get(i);
+            Ant.copy(antCopy, ant);
+        }
         CreepingGame creepingGame = new CreepingGame(this.ants, this.stick);
         nextAnts(this.antsCopy);
         return creepingGame;
@@ -54,11 +61,10 @@ public class PlayRoom implements Iterator<CreepingGame> {
         int maxIndex = ants.size() - 1;
         if (index > maxIndex) {
             hasNext = false;
-            return;
         } else {
             Ant ant = ants.get(index);
             ant.turnBack();
-            if (!ant.isFaceLeft()) {
+            if (ant.isFaceLeft()) {
                 recursiveNextAnts(ants, index + 1);
             }
         }

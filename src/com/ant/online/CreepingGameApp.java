@@ -44,6 +44,10 @@ public class CreepingGameApp extends Application {
         ants.add(new Ant(110, VELOCITY));
         ants.add(new Ant(160, VELOCITY));
         ants.add(new Ant(250, VELOCITY));
+
+//        ants.add(new Ant(0, VELOCITY));
+//        ants.add(new Ant(1, VELOCITY));
+//        ants.add(new Ant(2, VELOCITY));
     }
 
     @Override
@@ -104,15 +108,17 @@ public class CreepingGameApp extends Application {
             CreepingGame creepingGame = playRoom.next();
             while (!creepingGame.isGameOver()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
                     break;
                 }
                 try {
                     creepingGame.nextTick();
-                    System.out.println("tick");
+                    System.out.println("tick " + creepingGame.getTick());
                     rootLayoutController.changeAnts();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     break;
                 }
             }
