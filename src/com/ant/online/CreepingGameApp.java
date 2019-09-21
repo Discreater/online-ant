@@ -5,13 +5,12 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class CreepingGame extends Application {
+public class CreepingGameApp extends Application {
 
     private Stage primaryStage;
     private BorderPane rootLayout;
@@ -44,14 +43,14 @@ public class CreepingGame extends Application {
     private void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(CreepingGame.class.getResource("view/RootLayout.fxml"));
+            loader.setLocation(CreepingGameApp.class.getResource("view/RootLayout.fxml"));
             rootLayout = loader.load();
 
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
 
             RootLayoutController controller = loader.getController();
-            controller.setCreepingGame(this);
+            controller.setCreepingGameApp(this);
 
             primaryStage.show();
         } catch (IOException e) {

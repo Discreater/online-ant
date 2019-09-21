@@ -4,11 +4,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Model class for a Person.
  */
-public class Ant {
+public class Ant implements Comparable<Ant>{
 
     private final IntegerProperty position;
     private final IntegerProperty velocity;
@@ -83,5 +84,28 @@ public class Ant {
 
     public void setOnline(boolean online) {
         this.online.set(online);
+    }
+
+    @Override
+    public int compareTo(@NotNull Ant o) {
+        int pos1=this.getPosition();
+        int pos2=o.getPosition();
+        if (pos1!=pos2){
+            return pos1 - pos2;
+        }else {
+            boolean facing1=this.isFaceLeft();
+            boolean facing2=o.isFaceLeft();
+            if(facing1 && !facing2) {
+                return -1;
+            }else if (facing1 == facing2){
+                return 0;
+            }else {
+                return 1;
+            }
+        }
+    }
+
+    public void turnBack() {
+        this.setFaceLeft(!this.isFaceLeft());
     }
 }

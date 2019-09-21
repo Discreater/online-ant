@@ -1,16 +1,16 @@
 package com.ant.online.controller;
 
-import com.ant.online.CreepingGame;
+import com.ant.online.CreepingGameApp;
 
 public class RootLayoutController {
     // Reference to the main application
-    private CreepingGame creepingGame;
+    private CreepingGameApp creepingGameApp;
 
     /**
      * Is called by the main application to give a reference back to itself.
      */
-    public void setCreepingGame(CreepingGame creepingGame) {
-        this.creepingGame = creepingGame;
+    public void setCreepingGameApp(CreepingGameApp creepingGameApp) {
+        this.creepingGameApp = creepingGameApp;
     }
 
 }
