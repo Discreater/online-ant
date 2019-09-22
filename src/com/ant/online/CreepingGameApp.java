@@ -6,6 +6,7 @@ import com.ant.online.model.CreepingGame;
 import com.ant.online.model.PlayRoom;
 import com.ant.online.model.Stick;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -51,7 +52,7 @@ public class CreepingGameApp extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage){
+    public void start(Stage primaryStage) {
         initStage(primaryStage);
 
         initRootLayout();
@@ -102,10 +103,13 @@ public class CreepingGameApp extends Application {
         // TODO
     }
 
-    public void startPlay(){
+    public void startPlay() {
         PlayRoom playRoom = new PlayRoom(ants, stick);
         while (playRoom.hasNext()) {
             CreepingGame creepingGame = playRoom.next();
+            Platform.runLater(() -> {
+//                rootLayoutController.putAnts();
+            });
             while (!creepingGame.isGameOver()) {
                 try {
                     Thread.sleep(10);
@@ -116,7 +120,9 @@ public class CreepingGameApp extends Application {
                 try {
                     creepingGame.nextTick();
                     System.out.println("tick " + creepingGame.getTick());
-                    rootLayoutController.changeAnts();
+                    Platform.runLater(() -> {
+                        rootLayoutController.changeAnts();
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                     break;
