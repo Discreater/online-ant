@@ -16,20 +16,40 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreepingGameApp extends Application {
 
-    public static final int VELOCITY = 5;
     private Stage primaryStage;
     private BorderPane rootLayout;
 
-
+    private int velocity = 5;
     private Stick stick;
     private ObservableList<Ant> ants = FXCollections.observableArrayList();
+    private RootLayoutController rootLayoutController;
+
     private CreepingGame currentCreepingGame = null;
     private PlayRoom currentPlayingRoom = null;
-    private RootLayoutController rootLayoutController;
-    private boolean running = false;
+
+    public enum State {
+        IDLE, STOPPING, PAUSED, PLAYING
+    }
+
+    private State appState;
+
+    public State getAppState() {
+        return appState;
+    }
+
+    public void setAppState(State appState) {
+        appStateChange(this.appState, appState);
+        this.appState = appState;
+    }
+
+    private void appStateChange(State oldState, State newState) {
+        rootLayoutController.playAndPauseButtonSetState(newState);
+    }
 
     public ObservableList<Ant> getAnts() {
         return ants;
@@ -40,28 +60,43 @@ public class CreepingGameApp extends Application {
     }
 
     public CreepingGameApp() {
-        // Add som sample data
-        this.stick = new Stick(300);
-        ants.add(new Ant(0, VELOCITY));
-        ants.add(new Ant(80, VELOCITY));
-        ants.add(new Ant(110, VELOCITY));
-        ants.add(new Ant(160, VELOCITY));
-        ants.add(new Ant(250, VELOCITY));
 
-//        ants.add(new Ant(0, VELOCITY));
-//        ants.add(new Ant(1, VELOCITY));
-//        ants.add(new Ant(2, VELOCITY));
     }
 
     @Override
     public void start(Stage primaryStage) {
+
+        setAppState(State.IDLE);
+
         initStage(primaryStage);
 
         initRootLayout();
 
+        setDefaultInput();
+
+
+
         initScreen();
 
         initUserPanel();
+    }
+
+    public void setDefaultInput(){
+        if (appState == State.PLAYING) return;
+        // Add som sample data
+        this.stick = new Stick(300);
+        this.ants.clear();
+        this.ants.add(new Ant(0, velocity));
+        this.ants.add(new Ant(80, velocity));
+        this.ants.add(new Ant(110, velocity));
+        this.ants.add(new Ant(160, velocity));
+        this.ants.add(new Ant(250, velocity));
+
+        List<Integer> aP = new ArrayList<>(ants.size());
+        for (Ant ant : ants) {
+            aP.add(ant.getPosition());
+        }
+        this.rootLayoutController.setInputForm(5, 300, aP);
     }
 
     /**
@@ -101,11 +136,12 @@ public class CreepingGameApp extends Application {
     }
 
     private void initUserPanel() {
-
         // TODO
     }
 
     public void startPlay() {
+        if (appState == State.PLAYING) return;
+        appState = State.PLAYING;
         this.currentPlayingRoom = new PlayRoom(this.getAnts(), this.getStick());
         currentCreepingGame = currentPlayingRoom.hasNext() ? currentPlayingRoom.next() : null;
         this.rootLayoutController.putAnts();
@@ -117,7 +153,8 @@ public class CreepingGameApp extends Application {
                     e.printStackTrace();
                 }
             }
-            running = false;
+            System.out.println("Thread terminated.");
+            appState = State.IDLE;
         });
         thread.start();
         System.out.println("Thread started...");
@@ -127,6 +164,7 @@ public class CreepingGameApp extends Application {
         if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
             if (currentPlayingRoom.hasNext()) {
                 this.currentCreepingGame = currentPlayingRoom.next();
+
                 Platform.runLater(() -> this.rootLayoutController.putAnts());
                 return true;
             } else {
@@ -143,6 +181,14 @@ public class CreepingGameApp extends Application {
                 return true;
             }
         }
+    }
+
+    public int getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(int velocity) {
+        this.velocity = velocity;
     }
 
     private void tick() {

@@ -5,6 +5,7 @@ import com.ant.online.model.Ant;
 import com.ant.online.model.CreepingGame;
 import com.ant.online.model.PlayRoom;
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -15,11 +16,13 @@ import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class RootLayoutController {
-    public static final double stickLength = 600.0;
-    public static final double antWidth = 20.0;
+    public static final double stickTrueLength = 600.0;
+    public static final double antImageWidth = 20.0;
     public static final double antVBoxWidth = 30.0;
     public static final double antVBoxHeight = 45;
     public static final double offset = 100.0;
@@ -50,14 +53,15 @@ public class RootLayoutController {
     @FXML
     private TextField maxTimeField;
 
-    private CreepingGameApp creepingGameApp;
+    @FXML
+    private Button commitButton;
+    @FXML
+    private Button setDefaultButton;
+
     // Reference to the main application
+    private CreepingGameApp creepingGameApp;
 
-    private CreepingGame currentCreepingGame = null;
-    private PlayRoom currentPlayingRoom = null;
-
-    private Boolean running = false;
-
+    private boolean running = false;
 
     private Image antImageLeft;
     private Image antImageRight;
@@ -69,11 +73,65 @@ public class RootLayoutController {
     }
 
     /**
+     * When click the "恢复默认" button.
+     */
+    @FXML
+    private void handleSetDefault() {
+        this.creepingGameApp.setDefaultInput();
+    }
+
+    /**
      * When click the "确认" button
      */
     @FXML
-    private void handleCommmit() {
-        // TODO: initial whole game by the input data,
+    private void handleCommit(){
+        try {
+            int velocity = Integer.parseInt(velocityField.getText());
+            int stickLength = Integer.parseInt(stickLengthField.getText());
+            if (velocity <= 0 || stickLength <= 0) {
+                throw new NumberFormatException();
+            }
+            String antPosition = antsPositionTA.getText();
+            String[] antsPositions = antPosition.split("[ ,，:\n]");
+            List<Integer> aPI = new ArrayList<>(antPosition.length());
+            for (String aPS : antsPositions) {
+                System.out.println(aPS);
+                int ap = Integer.parseInt(aPS);
+                if(ap < 0){
+                    throw new NumberFormatException();
+                }
+                aPI.add(ap);
+            }
+            Collections.sort(aPI);
+
+            // Format the input text field.
+            setInputForm(velocity, stickLength, aPI);
+            // Clear ant list
+            creepingGameApp.getAnts().clear();
+
+            creepingGameApp.setVelocity(velocity);
+            creepingGameApp.getStick().setLength(stickLength);
+            for (Integer ap : aPI) {
+                Ant ant = new Ant(ap, velocity);
+                creepingGameApp.getAnts().add(ant);
+            }
+        } catch (NumberFormatException e){
+            System.out.println("Input invalid!");
+        }
+    }
+
+    public void setInputForm(int velocity, int stickLength, @NotNull List<Integer> aPI) {
+        velocityField.setText(Integer.toString(velocity));
+        stickLengthField.setText(Integer.toString(stickLength));
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterator<Integer> iterator = aPI.iterator();
+        while (iterator.hasNext()) {
+            stringBuilder.append(iterator.next());
+            if (iterator.hasNext()) {
+                stringBuilder.append(",");
+            }
+        }
+        antsPositionTA.setText(stringBuilder.toString());
     }
 
     /**
@@ -81,8 +139,6 @@ public class RootLayoutController {
      */
     @FXML
     private void handleStart() {
-        if (running) return;
-        running = true;
         creepingGameApp.startPlay();
     }
 
@@ -95,7 +151,6 @@ public class RootLayoutController {
     private void handleNextTick() {
        creepingGameApp.nextTick();
     }
-
 
     private List<VBox> antVBoxes;
     private List<ImageView> antImages;
@@ -114,11 +169,11 @@ public class RootLayoutController {
             AnchorPane.setLeftAnchor(tmpVBox, getTruePosition(creepingGameApp.getAnts().get(i)));
 
             Label antSerial = new Label();
-            antSerial.setText(new Integer(i).toString());
+            antSerial.setText(Integer.toString(i));
 
             ImageView tmpImage = new ImageView(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
             antImages.add(tmpImage);
-            tmpImage.setFitWidth(antWidth);
+            tmpImage.setFitWidth(antImageWidth);
             tmpImage.setPreserveRatio(true);
             tmpImage.setSmooth(true);
             tmpImage.setPickOnBounds(true);
@@ -140,7 +195,7 @@ public class RootLayoutController {
     }
 
     private double getTruePosition(@NotNull Ant ant) {
-        return ant.getPosition() * stickLength / creepingGameApp.getStick().getLength() - antVBoxWidth / 2.0 + offset;
+        return ant.getPosition() * stickTrueLength / creepingGameApp.getStick().getLength() - antVBoxWidth / 2.0 + offset;
     }
 
     /**
@@ -148,5 +203,9 @@ public class RootLayoutController {
      */
     public void setCreepingGameApp(CreepingGameApp creepingGameApp) {
         this.creepingGameApp = creepingGameApp;
+    }
+
+    public void playAndPauseButtonSetState(CreepingGameApp.State state) {
+
     }
 }

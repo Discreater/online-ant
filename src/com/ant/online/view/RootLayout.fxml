@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ant.online.controller.RootLayoutController">
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ant.online.controller.RootLayoutController">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
@@ -77,13 +77,18 @@
                                 <RowConstraints fillHeight="false" maxHeight="83.0" minHeight="10.0" prefHeight="52.0" valignment="CENTER" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
+                                <HBox alignment="CENTER" spacing="10.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                    <children>
+                                        <Button fx:id="setDefaultButton" mnemonicParsing="false" onAction="#handleSetDefault" text="恢复默认" />
+                                        <Button fx:id="commitButton" mnemonicParsing="false" onAction="#handleCommit" text="确认" />
+                                    </children>
+                                </HBox>
                                 <Label text="速度" />
                                 <Label text="杆长度" GridPane.rowIndex="1" />
                                 <Label text="蚂蚁位置" GridPane.rowIndex="2" />
                                 <TextField fx:id="velocityField" GridPane.columnIndex="1" />
                                 <TextField fx:id="stickLengthField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <TextArea fx:id="antsPositionTA" prefHeight="72.0" prefWidth="230.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                <Button mnemonicParsing="false" text="确认" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                             </children>
                         </GridPane>
                         <VBox alignment="TOP_CENTER" layoutX="318.0" layoutY="5.0" prefHeight="137.0" prefWidth="81.0" spacing="10.0">
@@ -94,8 +99,9 @@
                                         <Label fx:id="currentTimeLabel" text="0" />
                                     </children>
                                 </HBox>
-                                <Button mnemonicParsing="false" onAction="#handleStart" text="开始" />
-                                <Button mnemonicParsing="false" onAction="#handleNextTick" text="下一帧" />
+                                <Button fx:id="startAndSkipButton" mnemonicParsing="false" onAction="#handleStart" text="开始" />
+                        <Button fx:id="playAndPauseButton" mnemonicParsing="false" text="播放" />
+                                <Button fx:id="nextConditionButton" mnemonicParsing="false" onAction="#handleNextTick" text="下一情况" />
                             </children>
                         </VBox>
                         <TableView fx:id="currentAntTable" layoutX="424.0" layoutY="5.0" prefHeight="153.0" prefWidth="132.0">
