@@ -26,8 +26,10 @@ public class CreepingGameApp extends Application {
 
     private Stick stick;
     private ObservableList<Ant> ants = FXCollections.observableArrayList();
-
+    private CreepingGame currentCreepingGame = null;
+    private PlayRoom currentPlayingRoom = null;
     private RootLayoutController rootLayoutController;
+    private boolean running = false;
 
     public ObservableList<Ant> getAnts() {
         return ants;
@@ -104,29 +106,41 @@ public class CreepingGameApp extends Application {
     }
 
     public void startPlay() {
-        PlayRoom playRoom = new PlayRoom(ants, stick);
-        while (playRoom.hasNext()) {
-            CreepingGame creepingGame = playRoom.next();
-            Platform.runLater(() -> {
-//                rootLayoutController.putAnts();
-            });
-            while (!creepingGame.isGameOver()) {
+        this.currentPlayingRoom = new PlayRoom(this.getAnts(), this.getStick());
+        currentCreepingGame = currentPlayingRoom.hasNext() ? currentPlayingRoom.next() : null;
+        this.rootLayoutController.putAnts();
+        Thread thread = new Thread(() -> {
+            while (nextTick()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    break;
                 }
-                try {
-                    creepingGame.nextTick();
-                    System.out.println("tick " + creepingGame.getTick());
-                    Platform.runLater(() -> {
-                        rootLayoutController.changeAnts();
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    break;
-                }
+            }
+            running = false;
+        });
+        thread.start();
+        System.out.println("Thread started...");
+    }
+
+    public boolean nextTick() {
+        if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
+            if (currentPlayingRoom.hasNext()) {
+                this.currentCreepingGame = currentPlayingRoom.next();
+                Platform.runLater(() -> this.rootLayoutController.putAnts());
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            try {
+                Thread.sleep(10);
+                currentCreepingGame.nextTick();
+                Platform.runLater(() -> this.rootLayoutController.changeAnts());
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                return true;
             }
         }
     }

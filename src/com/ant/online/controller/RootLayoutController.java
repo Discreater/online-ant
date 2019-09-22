@@ -72,7 +72,7 @@ public class RootLayoutController {
      * When click the "确认" button
      */
     @FXML
-    private void handleCommmit(){
+    private void handleCommmit() {
         // TODO: initial whole game by the input data,
     }
 
@@ -81,27 +81,9 @@ public class RootLayoutController {
      */
     @FXML
     private void handleStart() {
-        if(running) return;
+        if (running) return;
         running = true;
-        this.currentPlayingRoom = new PlayRoom(creepingGameApp.getAnts(), creepingGameApp.getStick());
-        currentCreepingGame = currentPlayingRoom.hasNext() ? currentPlayingRoom.next() : null;
-        putAnts();
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                while (handleNextTick()) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                running = false;
-            }
-        });
-        thread.start();
-        System.out.println("Thread started...");
+        creepingGameApp.startPlay();
     }
 
     /**
@@ -109,28 +91,11 @@ public class RootLayoutController {
      *
      * @return only for the {@link RootLayoutController#handleStart()} to invoke
      */
-    @NotNull
     @FXML
-    private Boolean handleNextTick() {
-        if(!currentPlayingRoom.hasNext()){
-            return false;
-        } else if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
-            this.currentCreepingGame = currentPlayingRoom.next();
-            Platform.runLater(() -> putAnts());
-            return true;
-        } else if (!currentCreepingGame.isGameOver()) {
-            try {
-                Thread.sleep(10);
-                currentCreepingGame.nextTick();
-                Platform.runLater(() -> changeAnts());
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                return true;
-            }
-        }
-        return  false;
+    private void handleNextTick() {
+       creepingGameApp.nextTick();
     }
+
 
     private List<VBox> antVBoxes;
     private List<ImageView> antImages;
