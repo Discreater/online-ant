@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ant.online.controller.RootLayoutController">
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ant.online.controller.RootLayoutController">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
@@ -65,7 +65,7 @@
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                     <children>
-                        <GridPane layoutX="27.0" layoutY="-2.0" prefHeight="139.0" prefWidth="273.0" AnchorPane.leftAnchor="27.0">
+                        <GridPane layoutX="27.0" layoutY="-2.0" prefHeight="183.0" prefWidth="273.0" AnchorPane.leftAnchor="27.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="132.0" minWidth="10.0" prefWidth="73.0" />
                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="200.0" />
@@ -73,7 +73,8 @@
                             <rowConstraints>
                                 <RowConstraints maxHeight="47.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
                                 <RowConstraints maxHeight="66.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
-                                <RowConstraints maxHeight="83.0" minHeight="10.0" prefHeight="76.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES" />
+                                <RowConstraints fillHeight="false" maxHeight="83.0" minHeight="10.0" prefHeight="52.0" valignment="CENTER" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
                                 <Label text="速度" />
@@ -82,9 +83,10 @@
                                 <TextField fx:id="velocityField" GridPane.columnIndex="1" />
                                 <TextField fx:id="stickLengthField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <TextArea fx:id="antsPositionTA" prefHeight="72.0" prefWidth="230.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <Button mnemonicParsing="false" text="确认" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                             </children>
                         </GridPane>
-                        <VBox alignment="CENTER" layoutX="318.0" layoutY="5.0" prefHeight="137.0" prefWidth="81.0" spacing="10.0">
+                        <VBox alignment="TOP_CENTER" layoutX="318.0" layoutY="5.0" prefHeight="137.0" prefWidth="81.0" spacing="10.0">
                             <children>
                                 <HBox alignment="CENTER" prefHeight="28.0" prefWidth="69.0" spacing="10.0">
                                     <children>
@@ -96,7 +98,6 @@
                                 <Button mnemonicParsing="false" onAction="#handleNextTick" text="下一帧" />
                             </children>
                         </VBox>
-                        <Button layoutX="153.0" layoutY="141.0" mnemonicParsing="false" text="确认" />
                         <TableView fx:id="currentAntTable" layoutX="424.0" layoutY="5.0" prefHeight="153.0" prefWidth="132.0">
                             <columns>
                                 <TableColumn fx:id="currentAntSerialColumn" prefWidth="35.0" text="蚂蚁" />

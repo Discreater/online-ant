@@ -6,15 +6,22 @@ import com.ant.online.model.CreepingGame;
 import com.ant.online.model.PlayRoom;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RootLayoutController {
     public static final double stickLength = 600.0;
     public static final double antWidth = 20.0;
+    public static final double antVBoxWidth = 30.0;
+    public static final double antVBoxHeight = 45;
     public static final double offset = 100.0;
 
     @FXML
@@ -125,33 +132,50 @@ public class RootLayoutController {
         return  false;
     }
 
-    private ImageView[] antsImages = new ImageView[5];
+    private List<VBox> antVBoxes;
+    private List<ImageView> antImages;
 
     public void putAnts() {
-        for (int i = 0; i < creepingGameApp.getAnts().size(); i++) {
-            antsImages[i] = new ImageView(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
-            antsImages[i].setFitWidth(35);
-            antsImages[i].setPreserveRatio(true);
-            antsImages[i].setSmooth(true);
-            AnchorPane.setLeftAnchor(antsImages[i], getTruePosition(creepingGameApp.getAnts().get(i)));
-            AnchorPane.setBottomAnchor(antsImages[i], 0.0);
-            antsImageLayout.getChildren().add(antsImages[i]);
+        int antAmount = creepingGameApp.getAnts().size();
+        antVBoxes = new ArrayList<>(antAmount);
+        antImages = new ArrayList<>(antAmount);
+        for (int i = 0; i < antAmount; i++) {
+            VBox tmpVBox = new VBox((i % 2) * 10 + 10.0);
+            antVBoxes.add(tmpVBox);
+            tmpVBox.setPrefHeight(antVBoxHeight);
+            tmpVBox.setPrefWidth(antVBoxWidth);
+            tmpVBox.setAlignment(Pos.BOTTOM_CENTER);
+            AnchorPane.setBottomAnchor(tmpVBox, 0.0);
+            AnchorPane.setLeftAnchor(tmpVBox, getTruePosition(creepingGameApp.getAnts().get(i)));
+
+            Label antSerial = new Label();
+            antSerial.setText(new Integer(i).toString());
+
+            ImageView tmpImage = new ImageView(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
+            antImages.add(tmpImage);
+            tmpImage.setFitWidth(antWidth);
+            tmpImage.setPreserveRatio(true);
+            tmpImage.setSmooth(true);
+            tmpImage.setPickOnBounds(true);
+
+            tmpVBox.getChildren().addAll(antSerial, tmpImage);
+            antsImageLayout.getChildren().add(tmpVBox);
         }
     }
 
     public void changeAnts() {
         for (int i = 0; i < creepingGameApp.getAnts().size(); i++) {
             if (!creepingGameApp.getAnts().get(i).isOnline()) {
-                antsImageLayout.getChildren().remove(antsImages[i]);
+                antsImageLayout.getChildren().remove(antVBoxes.get(i));
             } else {
-                AnchorPane.setLeftAnchor(antsImages[i], getTruePosition(creepingGameApp.getAnts().get(i)));
-                antsImages[i].setImage(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
+                AnchorPane.setLeftAnchor(antVBoxes.get(i), getTruePosition(creepingGameApp.getAnts().get(i)));
+                antImages.get(i).setImage(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
             }
         }
     }
 
     private double getTruePosition(@NotNull Ant ant) {
-        return ant.getPosition() * stickLength / creepingGameApp.getStick().getLength() - antWidth / 2.0 + offset;
+        return ant.getPosition() * stickLength / creepingGameApp.getStick().getLength() - antVBoxWidth / 2.0 + offset;
     }
 
     /**
