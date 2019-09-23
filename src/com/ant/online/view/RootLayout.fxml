@@ -99,9 +99,9 @@
                                         <Label fx:id="currentTimeLabel" text="0" />
                                     </children>
                                 </HBox>
-                                <Button fx:id="startAndSkipButton" mnemonicParsing="false" onAction="#handleStart" text="开始" />
-                        <Button fx:id="playAndPauseButton" mnemonicParsing="false" text="播放" />
-                                <Button fx:id="nextConditionButton" mnemonicParsing="false" onAction="#handleNextTick" text="下一情况" />
+                                <Button fx:id="startAndSkipButton" mnemonicParsing="false" onAction="#handleStartOrSkip" text="开始" />
+                                <Button fx:id="playAndPauseButton" mnemonicParsing="false" onAction="#handlePlayOrPause" text="播放" />
+                                <Button fx:id="nextConditionButton" mnemonicParsing="false" onAction="#handleNextCondition" text="下一情况" />
                             </children>
                         </VBox>
                         <TableView fx:id="currentAntTable" layoutX="424.0" layoutY="5.0" prefHeight="153.0" prefWidth="132.0">

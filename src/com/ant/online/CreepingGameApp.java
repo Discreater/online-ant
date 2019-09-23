@@ -33,7 +33,7 @@ public class CreepingGameApp extends Application {
     private PlayRoom currentPlayingRoom = null;
 
     public enum State {
-        IDLE, STOPPING, PAUSED, PLAYING
+        IDLE, STOPPING, PAUSED, PLAYING, CHANGING
     }
 
     private State appState;
@@ -43,12 +43,12 @@ public class CreepingGameApp extends Application {
     }
 
     public void setAppState(State appState) {
-        appStateChange(this.appState, appState);
         this.appState = appState;
+        appStateChange();
     }
 
-    private void appStateChange(State oldState, State newState) {
-        rootLayoutController.playAndPauseButtonSetState(newState);
+    private void appStateChange() {
+        Platform.runLater(() -> this.rootLayoutController.appStateChange());
     }
 
     public ObservableList<Ant> getAnts() {
@@ -65,16 +65,13 @@ public class CreepingGameApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
-        setAppState(State.IDLE);
-
         initStage(primaryStage);
 
         initRootLayout();
 
         setDefaultInput();
 
-
+        setAppState(State.IDLE);
 
         initScreen();
 
@@ -140,8 +137,6 @@ public class CreepingGameApp extends Application {
     }
 
     public void startPlay() {
-        if (appState == State.PLAYING) return;
-        appState = State.PLAYING;
         this.currentPlayingRoom = new PlayRoom(this.getAnts(), this.getStick());
         currentCreepingGame = currentPlayingRoom.hasNext() ? currentPlayingRoom.next() : null;
         this.rootLayoutController.putAnts();
@@ -154,7 +149,7 @@ public class CreepingGameApp extends Application {
                 }
             }
             System.out.println("Thread terminated.");
-            appState = State.IDLE;
+            setAppState(State.IDLE);
         });
         thread.start();
         System.out.println("Thread started...");

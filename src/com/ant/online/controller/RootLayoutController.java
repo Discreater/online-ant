@@ -2,10 +2,6 @@ package com.ant.online.controller;
 
 import com.ant.online.CreepingGameApp;
 import com.ant.online.model.Ant;
-import com.ant.online.model.CreepingGame;
-import com.ant.online.model.PlayRoom;
-import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -58,10 +54,15 @@ public class RootLayoutController {
     @FXML
     private Button setDefaultButton;
 
+    @FXML
+    private Button startAndSkipButton;
+    @FXML
+    private Button playAndPauseButton;
+    @FXML
+    private Button nextConditionButton;
+
     // Reference to the main application
     private CreepingGameApp creepingGameApp;
-
-    private boolean running = false;
 
     private Image antImageLeft;
     private Image antImageRight;
@@ -77,6 +78,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleSetDefault() {
+        if(creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
         this.creepingGameApp.setDefaultInput();
     }
 
@@ -85,6 +87,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleCommit(){
+        if(creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
         try {
             int velocity = Integer.parseInt(velocityField.getText());
             int stickLength = Integer.parseInt(stickLengthField.getText());
@@ -135,21 +138,40 @@ public class RootLayoutController {
     }
 
     /**
-     * When click the "开始" button
+     * When click the "开始 | 跳过动画" button.
      */
     @FXML
-    private void handleStart() {
-        creepingGameApp.startPlay();
+    private void handleStartOrSkip() {
+        if(creepingGameApp.getAppState() == CreepingGameApp.State.IDLE) {
+            creepingGameApp.setAppState(CreepingGameApp.State.PAUSED);
+            creepingGameApp.startPlay();
+        } else if (creepingGameApp.getAppState() == CreepingGameApp.State.PAUSED || creepingGameApp.getAppState() == CreepingGameApp.State.PLAYING) {
+            creepingGameApp.setAppState(CreepingGameApp.State.STOPPING);
+        }
     }
 
     /**
-     * When click the "下一帧" button or invoked by
-     *
-     * @return only for the {@link RootLayoutController#handleStart()} to invoke
+     * When click the "播放 | 暂停" button.
      */
     @FXML
-    private void handleNextTick() {
-       creepingGameApp.nextTick();
+    private void handlePlayOrPause() {
+        CreepingGameApp.State state = creepingGameApp.getAppState();
+        if (state == CreepingGameApp.State.PAUSED) {
+            creepingGameApp.setAppState(CreepingGameApp.State.PLAYING);
+        } else if(state == CreepingGameApp.State.PLAYING) {
+            creepingGameApp.setAppState(CreepingGameApp.State.PAUSED);
+        }
+    }
+
+    /**
+     * When click the "下一情况" button.
+     */
+    @FXML
+    private void handleNextCondition() {
+        CreepingGameApp.State state = creepingGameApp.getAppState();
+        if (state == CreepingGameApp.State.PAUSED || state == CreepingGameApp.State.PLAYING) {
+            creepingGameApp.setAppState(CreepingGameApp.State.CHANGING);
+        }
     }
 
     private List<VBox> antVBoxes;
@@ -205,7 +227,40 @@ public class RootLayoutController {
         this.creepingGameApp = creepingGameApp;
     }
 
-    public void playAndPauseButtonSetState(CreepingGameApp.State state) {
+    public void appStateChange() {
+        CreepingGameApp.State state = creepingGameApp.getAppState();
+        if (state == CreepingGameApp.State.PLAYING || state == CreepingGameApp.State.PAUSED) {
+            startAndSkipButton.setDisable(false);
+            startAndSkipButton.setText("跳过动画");
+        } else if (state == CreepingGameApp.State.IDLE){
+            startAndSkipButton.setDisable(false);
+            startAndSkipButton.setText("开始");
+        } else{
+            startAndSkipButton.setDisable(true);
+        }
 
+        if (state == CreepingGameApp.State.PLAYING) {
+            playAndPauseButton.setDisable(false);
+            playAndPauseButton.setText("暂停");
+        } else if (state == CreepingGameApp.State.PAUSED) {
+            playAndPauseButton.setDisable(false);
+            playAndPauseButton.setText("播放");
+        } else {
+            playAndPauseButton.setDisable(true);
+        }
+
+        if (state == CreepingGameApp.State.PAUSED || state == CreepingGameApp.State.PLAYING) {
+            nextConditionButton.setDisable(false);
+        } else {
+            nextConditionButton.setDisable(true);
+        }
+
+        if(state == CreepingGameApp.State.IDLE) {
+            setDefaultButton.setDisable(false);
+            commitButton.setDisable(false);
+        } else {
+            setDefaultButton.setDisable(true);
+            commitButton.setDisable(true);
+        }
     }
 }
