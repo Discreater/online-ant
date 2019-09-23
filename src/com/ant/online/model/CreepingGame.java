@@ -13,6 +13,8 @@ public class CreepingGame {
     private int beginIndex;
     private int endIndex;
     private int endTick;
+    private double accurateEndTick;
+    private boolean gameOver = false;
 
     public CreepingGame(List<Ant> ants, Stick stick) {
         this.ants = new ArrayList<>();
@@ -28,9 +30,9 @@ public class CreepingGame {
         int velocity = this.ants.get(0).getVelocity();
         tickLoopTimes = velocity;
         endTick = 0;
-        gameNumber=0;
-        for (int i=ants.size()-1;i>=0;i--) {
-            gameNumber<<=1;
+        gameNumber = 0;
+        for (int i = ants.size() - 1; i >= 0; i--) {
+            gameNumber <<= 1;
             if (!ants.get(i).isFaceLeft()) {
                 gameNumber++;
             }
@@ -43,11 +45,29 @@ public class CreepingGame {
     }
 
     public boolean isGameOver() {
-        if (beginIndex > endIndex) {
-            System.out.println("Game "+gameNumber+" terminated at tick " + tick);
-            setEndTick(tick);
+        if (!this.gameOver) {
+            if (beginIndex > endIndex) {
+                this.setEndTick(tick);
+                this.accurateEndTick = (this.moveCount * 1.0) / (this.tickLoopTimes * 1.0);
+                System.out.println("Game " + gameNumber + " terminated at tick " + tick + " moved " + this.getMoveCount()+" time(s)") ;
+                this.gameOver = true;
+            }
         }
-        return beginIndex > endIndex;
+        return this.gameOver;
+    }
+
+    public void moveOn() {
+        while (!this.isGameOver()) {
+            try {
+                nextTick();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public int getGameNumber() {
+        return gameNumber;
     }
 
     public int getMoveCount() {
@@ -66,9 +86,13 @@ public class CreepingGame {
         this.tick = tick;
     }
 
+    public double getAccurateEndTick() {
+        return accurateEndTick;
+    }
+
     public void nextTick() throws Exception {
-        this.setTick(this.getTick()+1);
-        System.out.println("Tick " + tick + " has just passed.");
+        this.setTick(this.getTick() + 1);
+//        System.out.println("Tick " + tick + " has just passed.");
         for (int i = 0; i < tickLoopTimes; i++) {
             if (isGameOver()) {
                 break;
@@ -87,24 +111,19 @@ public class CreepingGame {
     }
 
     public void move() throws Exception {
-        this.setMoveCount(this.getMoveCount()+1);
-
+        this.setMoveCount(this.getMoveCount() + 1);
         this.moveAll();
         this.bounceAll();
         this.turnBackAll();
         this.dropAll();
-        System.out.println("Movement " + moveCount + " has just happened.");
+//        System.out.println("Movement " + moveCount + " has just happened.");
     }
 
     private void moveAll() {
         for (int i = beginIndex; i <= endIndex; i++) {
             Ant ant = this.ants.get(i);
             int position = ant.getPosition();
-            if (ant.isFaceLeft()) {
-                ant.setPosition(position - 1);
-            } else {
-                ant.setPosition(position + 1);
-            }
+            ant.moveForward();
         }
     }
 
@@ -115,11 +134,11 @@ public class CreepingGame {
                 Ant nextAnt = ants.get(i + 1);
                 if (!ant.isFaceLeft()) {          // Facing right
                     if (ant.getPosition() > nextAnt.getPosition()) {
-                        ant.setPosition(ant.getPosition() - 1);
+                        ant.moveBackward();
                         ant.turnBack();
-                        nextAnt.setPosition(nextAnt.getPosition() + 1);
+                        nextAnt.moveBackward();
                         nextAnt.turnBack();
-                        System.out.println("Bounced ant " + i + " and " + i + 1);
+//                        System.out.println("Bounced ant " + i + " and " + i + 1);
                     }
                 }
             }
@@ -135,7 +154,7 @@ public class CreepingGame {
                 if (cmp > 0) {
                     ant.turnBack();
                     nextAnt.turnBack();
-                    System.out.println("Turned back " + i + "and" + Integer.toString(i + 1));
+//                    System.out.println("Turned back " + i + "and" + Integer.toString(i + 1));
                 } else if (cmp == 0) {
                     throw new Exception(("Error detected in turnBackAll: " + Integer.toString(i)));
                 }
@@ -151,13 +170,13 @@ public class CreepingGame {
             beginIndex++;
             firstAnt.setOnline(false);
             firstAnt.setDropTime(this.tick);
-            System.out.println("ant " + firstAnt + " is dropping");
+//            System.out.println("ant " + firstAnt + " is dropping");
         }
         if (!stick.onStick(lastAnt.getPosition())) {
             endIndex--;
             lastAnt.setOnline(false);
             lastAnt.setDropTime(this.tick);
-            System.out.println("ant " + lastAnt + " is dropping");
+//            System.out.println("ant " + lastAnt + " is dropping");
         }
     }
 }

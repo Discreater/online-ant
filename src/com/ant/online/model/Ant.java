@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Model class for a Person.
  */
-public class Ant implements Comparable<Ant>{
+public class Ant implements Comparable<Ant> {
 
     private final IntegerProperty position;
     private final IntegerProperty velocity;
@@ -34,7 +34,7 @@ public class Ant implements Comparable<Ant>{
         this.dropTime = new SimpleIntegerProperty(0);
         this.online = new SimpleBooleanProperty(true);
 
-        Ant.copy(src,this);
+        Ant.copy(src, this);
     }
 
     public int getPosition() {
@@ -99,18 +99,18 @@ public class Ant implements Comparable<Ant>{
 
     @Override
     public int compareTo(@NotNull Ant o) {
-        int pos1=this.getPosition();
-        int pos2=o.getPosition();
-        if (pos1!=pos2){
+        int pos1 = this.getPosition();
+        int pos2 = o.getPosition();
+        if (pos1 != pos2) {
             return pos1 - pos2;
-        }else {
-            boolean facing1=this.isFaceLeft();
-            boolean facing2=o.isFaceLeft();
-            if(facing1 && !facing2) {
+        } else {
+            boolean facing1 = this.isFaceLeft();
+            boolean facing2 = o.isFaceLeft();
+            if (facing1 && !facing2) {
                 return -1;
-            }else if (facing1 == facing2){
+            } else if (facing1 == facing2) {
                 return 0;
-            }else {
+            } else {
                 return 1;
             }
         }
@@ -118,6 +118,24 @@ public class Ant implements Comparable<Ant>{
 
     public void turnBack() {
         this.setFaceLeft(!this.isFaceLeft());
+    }
+
+    public void moveForward() {
+        if (this.isFaceLeft()){
+            this.setPosition(this.getPosition() - 1);
+        }
+        else{
+            this.setPosition(this.getPosition() + 1);
+        }
+    }
+
+    public void moveBackward() {
+        if (this.isFaceLeft()){
+            this.setPosition(this.getPosition() + 1);
+        }
+        else{
+            this.setPosition(this.getPosition() - 1);
+        }
     }
 
     public static void copy(Ant src, Ant dst) {

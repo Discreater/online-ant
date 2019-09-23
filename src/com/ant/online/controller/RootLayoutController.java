@@ -110,13 +110,13 @@ public class RootLayoutController {
             // Format the input text field.
             setInputForm(velocity, stickLength, aPI);
             // Clear ant list
-            creepingGameApp.getAnts().clear();
+            creepingGameApp.getInitAnts().clear();
 
             creepingGameApp.setVelocity(velocity);
             creepingGameApp.getStick().setLength(stickLength);
             for (Integer ap : aPI) {
                 Ant ant = new Ant(ap, velocity);
-                creepingGameApp.getAnts().add(ant);
+                creepingGameApp.getInitAnts().add(ant);
             }
         } catch (NumberFormatException e){
             System.out.println("Input invalid!");
@@ -178,6 +178,7 @@ public class RootLayoutController {
     private List<ImageView> antImages;
 
     public void putAnts() {
+        antsImageLayout.getChildren().clear();
         int antAmount = creepingGameApp.getAnts().size();
         antVBoxes = new ArrayList<>(antAmount);
         antImages = new ArrayList<>(antAmount);

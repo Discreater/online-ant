@@ -1,5 +1,6 @@
 package com.ant.online;
 
+import com.ant.online.controller.AnimationThread;
 import com.ant.online.controller.RootLayoutController;
 import com.ant.online.model.Ant;
 import com.ant.online.model.CreepingGame;
@@ -27,10 +28,12 @@ public class CreepingGameApp extends Application {
     private int velocity = 5;
     private Stick stick;
     private ObservableList<Ant> ants = FXCollections.observableArrayList();
+    private List<Ant> initAnts = new ArrayList<>();
     private RootLayoutController rootLayoutController;
 
     private CreepingGame currentCreepingGame = null;
     private PlayRoom currentPlayingRoom = null;
+    private Thread animateThread = null;
 
     public enum State {
         IDLE, STOPPING, PAUSED, PLAYING, CHANGING
@@ -78,19 +81,19 @@ public class CreepingGameApp extends Application {
         initUserPanel();
     }
 
-    public void setDefaultInput(){
+    public void setDefaultInput() {
         if (appState == State.PLAYING) return;
         // Add som sample data
         this.stick = new Stick(300);
-        this.ants.clear();
-        this.ants.add(new Ant(0, velocity));
-        this.ants.add(new Ant(80, velocity));
-        this.ants.add(new Ant(110, velocity));
-        this.ants.add(new Ant(160, velocity));
-        this.ants.add(new Ant(250, velocity));
+        this.initAnts.clear();
+        this.initAnts.add(new Ant(0, velocity));
+        this.initAnts.add(new Ant(80, velocity));
+        this.initAnts.add(new Ant(110, velocity));
+        this.initAnts.add(new Ant(160, velocity));
+        this.initAnts.add(new Ant(250, velocity));
 
-        List<Integer> aP = new ArrayList<>(ants.size());
-        for (Ant ant : ants) {
+        List<Integer> aP = new ArrayList<>(initAnts.size());
+        for (Ant ant : initAnts) {
             aP.add(ant.getPosition());
         }
         this.rootLayoutController.setInputForm(5, 300, aP);
@@ -136,46 +139,51 @@ public class CreepingGameApp extends Application {
         // TODO
     }
 
+
+    public List<Ant> getInitAnts() {
+        return initAnts;
+    }
+
+    public void setInitAnts(List<Ant> initAnts) {
+        this.initAnts = initAnts;
+    }
+
     public void startPlay() {
+        ants.clear();
+        for (int i=0;i<this.initAnts.size();i++) {
+            ants.add(new Ant(initAnts.get(i)));
+        }
         this.currentPlayingRoom = new PlayRoom(this.getAnts(), this.getStick());
-        currentCreepingGame = currentPlayingRoom.hasNext() ? currentPlayingRoom.next() : null;
+        this.nextGame();
         this.rootLayoutController.putAnts();
-        Thread thread = new Thread(() -> {
-            while (nextTick()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            System.out.println("Thread terminated.");
-            setAppState(State.IDLE);
-        });
-        thread.start();
+        this.animateThread = new AnimationThread(this);
+        this.animateThread.start();
         System.out.println("Thread started...");
     }
 
-    public boolean nextTick() {
+    public boolean nextGame() {
         if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
             if (currentPlayingRoom.hasNext()) {
-                this.currentCreepingGame = currentPlayingRoom.next();
-
-                Platform.runLater(() -> this.rootLayoutController.putAnts());
-                return true;
+                this.currentCreepingGame = this.currentPlayingRoom.next();
             } else {
                 return false;
             }
-        } else {
-            try {
-                Thread.sleep(10);
-                currentCreepingGame.nextTick();
-                Platform.runLater(() -> this.rootLayoutController.changeAnts());
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                return true;
-            }
         }
+        return true;
+    }
+
+    public boolean nextTick() {
+        assert this.appState == State.PLAYING || this.appState == State.PAUSED;
+        if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
+            return false;
+        }
+        try {
+            currentCreepingGame.nextTick();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     public int getVelocity() {
@@ -186,8 +194,16 @@ public class CreepingGameApp extends Application {
         this.velocity = velocity;
     }
 
-    private void tick() {
+    public RootLayoutController getRootLayoutController() {
+        return rootLayoutController;
+    }
 
+    public CreepingGame getCurrentCreepingGame() {
+        return currentCreepingGame;
+    }
+
+    public PlayRoom getCurrentPlayingRoom() {
+        return currentPlayingRoom;
     }
 
     public static void main(String[] args) {
