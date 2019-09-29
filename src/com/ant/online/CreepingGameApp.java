@@ -107,7 +107,7 @@ public class CreepingGameApp extends Application {
     private void initStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("online ant");
-        this.primaryStage.getIcons().add(new Image("file:resources/images/ant_32.png"));
+        this.primaryStage.getIcons().add(new Image("resources/icon/ant_32.png"));
         this.primaryStage.setOnCloseRequest(event -> this.setAppState(State.IDLE));
     }
 

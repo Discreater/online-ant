@@ -75,8 +75,8 @@ public class RootLayoutController {
 
     @FXML
     private void initialize() {
-        antImageLeft = new Image("file:resources/images/ant.png");
-        antImageRight = new Image("file:resources/images/ant-reverse.png");
+        antImageLeft = new Image("resources/images/ant.png");
+        antImageRight = new Image("resources/images/ant-reverse.png");
         currentAntSerialColumn.setCellFactory((col) ->
                 new TableCell<Ant, String>() {
                     @Override
