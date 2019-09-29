@@ -1,13 +1,12 @@
 package com.ant.online.controller;
 
 import com.ant.online.CreepingGameApp;
-import com.ant.online.model.PlayRoom;
 import javafx.application.Platform;
 
 public class AnimationThread extends Thread {
 
-    private CreepingGameApp app = null;
-    private RootLayoutController controller = null;
+    private CreepingGameApp app;
+    private RootLayoutController controller;
 
     public AnimationThread(CreepingGameApp app) {
         super("Animation Thread");
@@ -29,7 +28,7 @@ public class AnimationThread extends Thread {
                 case PLAYING:
                     try {
                         if (!this.app.getCurrentCreepingGame().isGameOver()) {
-                            Thread.sleep(40);
+                            Thread.sleep(this.sleepTime(app.getAnimationSpeed()));
                             this.app.getCurrentCreepingGame().nextTick();
                             this.changeAnts();
                         } else {
@@ -64,26 +63,18 @@ public class AnimationThread extends Thread {
                     System.err.println("Error state detected!");
                     break;
             }
-            if (toBreak) {
-                break;
-            }
         }
         this.app.setAppState(CreepingGameApp.State.IDLE);
-        PlayRoom playRoom=this.app.getCurrentPlayingRoom();
-        playRoom.finish();
+        this.finish();
         System.out.println("Thread terminated.");
     }
 
     private void putAnts() {
-        Platform.runLater(() -> {
-            this.controller.putAnts();
-        });
+        Platform.runLater(() -> this.controller.putAnts());
     }
 
     private void changeAnts() {
-        Platform.runLater(() -> {
-            this.controller.changeAnts();
-        });
+        Platform.runLater(() ->this.controller.changeAnts());
     }
 
     private void skipCurrentGame() {
@@ -95,4 +86,14 @@ public class AnimationThread extends Thread {
             this.skipCurrentGame();
         }
     }
+
+    private void finish() {
+        this.app.getCurrentPlayingRoom().finish();
+        Platform.runLater(() -> this.controller.roomFinish());
+    }
+
+    private long sleepTime(int v) {
+        return 4000 / v;
+    }
+
 }

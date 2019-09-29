@@ -2,6 +2,7 @@ package com.ant.online.controller;
 
 import com.ant.online.CreepingGameApp;
 import com.ant.online.model.Ant;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -17,11 +18,11 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RootLayoutController {
-    public static final double stickTrueLength = 600.0;
-    public static final double antImageWidth = 20.0;
-    public static final double antVBoxWidth = 30.0;
-    public static final double antVBoxHeight = 45;
-    public static final double offset = 100.0;
+    private static final double stickTrueLength = 600.0;
+    private static final double antImageWidth = 20.0;
+    private static final double antVBoxWidth = 30.0;
+    private static final double antVBoxHeight = 45;
+    private static final double offset = 100.0;
 
     @FXML
     private TextField velocityField;
@@ -35,12 +36,14 @@ public class RootLayoutController {
     @FXML
     private TableView<Ant> currentAntTable;
     @FXML
-    private TableColumn<Ant, Integer> currentAntSerialColumn;
+    private TableColumn<Ant, String> currentAntSerialColumn;
     @FXML
     private TableColumn<Ant, Integer> currentAntPositionColumn;
     @FXML
-    private TableColumn<Ant, String> currentAntFaceColumn;
+    private TableColumn<Ant, Boolean> currentAntFaceColumn;
 
+    @FXML
+    private Label currentGameNumberLabel;
     @FXML
     private Label currentTimeLabel;
 
@@ -61,6 +64,9 @@ public class RootLayoutController {
     @FXML
     private Button nextConditionButton;
 
+    @FXML
+    private Slider speedSlider;
+
     // Reference to the main application
     private CreepingGameApp creepingGameApp;
 
@@ -71,6 +77,39 @@ public class RootLayoutController {
     private void initialize() {
         antImageLeft = new Image("file:resources/images/ant.png");
         antImageRight = new Image("file:resources/images/ant-reverse.png");
+        currentAntSerialColumn.setCellFactory((col) ->
+                new TableCell<Ant, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        this.setText(null);
+                        this.setGraphic(null);
+                        if (!empty) {
+                            this.setText(String.valueOf(this.getIndex()));
+                        }
+                    }
+                }
+        );
+        currentAntPositionColumn.setCellValueFactory(cellDate -> cellDate.getValue().positionProperty().asObject());
+
+        currentAntFaceColumn.setCellValueFactory(cellDate -> cellDate.getValue().faceLeftProperty());
+        currentAntFaceColumn.setCellFactory((col) ->
+                new TableCell<Ant, Boolean>() {
+                    @Override
+                    protected void updateItem(Boolean item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setText(null);
+                        } else {
+                            setText(item ? "左" : "右");
+                        }
+                    }
+                }
+        );
+        speedSlider.setValue(55.0);
+        speedSlider.valueProperty().addListener((ObservableValue<? extends Number> ov, Number old_val, Number new_val) ->
+            creepingGameApp.setAnimationSpeed(new_val.intValue())
+        );
     }
 
     /**
@@ -78,7 +117,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleSetDefault() {
-        if(creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
+        if (creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
         this.creepingGameApp.setDefaultInput();
     }
 
@@ -86,8 +125,8 @@ public class RootLayoutController {
      * When click the "确认" button
      */
     @FXML
-    private void handleCommit(){
-        if(creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
+    private void handleCommit() {
+        if (creepingGameApp.getAppState() != CreepingGameApp.State.IDLE) return;
         try {
             int velocity = Integer.parseInt(velocityField.getText());
             int stickLength = Integer.parseInt(stickLengthField.getText());
@@ -98,9 +137,8 @@ public class RootLayoutController {
             String[] antsPositions = antPosition.split("[ ,，:\n]");
             List<Integer> aPI = new ArrayList<>(antPosition.length());
             for (String aPS : antsPositions) {
-                System.out.println(aPS);
                 int ap = Integer.parseInt(aPS);
-                if(ap < 0){
+                if (ap < 0) {
                     throw new NumberFormatException();
                 }
                 aPI.add(ap);
@@ -118,8 +156,13 @@ public class RootLayoutController {
                 Ant ant = new Ant(ap, velocity);
                 creepingGameApp.getInitAnts().add(ant);
             }
-        } catch (NumberFormatException e){
-            System.out.println("Input invalid!");
+        } catch (NumberFormatException e) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("格式错误");
+            alert.setHeaderText("请检查输入格式");
+            alert.setContentText("输入必须为整数，各蚂蚁位置之间以逗号、空格、冒号或回车分隔.");
+
+            alert.showAndWait();
         }
     }
 
@@ -142,7 +185,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleStartOrSkip() {
-        if(creepingGameApp.getAppState() == CreepingGameApp.State.IDLE) {
+        if (creepingGameApp.getAppState() == CreepingGameApp.State.IDLE) {
             creepingGameApp.setAppState(CreepingGameApp.State.PAUSED);
             creepingGameApp.startPlay();
         } else if (creepingGameApp.getAppState() == CreepingGameApp.State.PAUSED || creepingGameApp.getAppState() == CreepingGameApp.State.PLAYING) {
@@ -158,7 +201,7 @@ public class RootLayoutController {
         CreepingGameApp.State state = creepingGameApp.getAppState();
         if (state == CreepingGameApp.State.PAUSED) {
             creepingGameApp.setAppState(CreepingGameApp.State.PLAYING);
-        } else if(state == CreepingGameApp.State.PLAYING) {
+        } else if (state == CreepingGameApp.State.PLAYING) {
             creepingGameApp.setAppState(CreepingGameApp.State.PAUSED);
         }
     }
@@ -215,6 +258,18 @@ public class RootLayoutController {
                 antImages.get(i).setImage(creepingGameApp.getAnts().get(i).isFaceLeft() ? antImageLeft : antImageRight);
             }
         }
+        minTimeField.setText(Double.toString(creepingGameApp.getCurrentPlayingRoom().getCurrentMinAccurateTick()));
+        maxTimeField.setText(Double.toString(creepingGameApp.getCurrentPlayingRoom().getCurrentMaxAccurateTick()));
+        currentTimeLabel.setText(Integer.toString(creepingGameApp.getCurrentCreepingGame().getTick()));
+    }
+
+    public void gameInit(){
+        currentGameNumberLabel.setText(Integer.toString(creepingGameApp.getCurrentCreepingGame().getGameNumber()));
+    }
+
+    public void roomFinish() {
+        currentGameNumberLabel.setText("0");
+        currentTimeLabel.setText("0");
     }
 
     private double getTruePosition(@NotNull Ant ant) {
@@ -226,42 +281,60 @@ public class RootLayoutController {
      */
     public void setCreepingGameApp(CreepingGameApp creepingGameApp) {
         this.creepingGameApp = creepingGameApp;
+        this.currentAntTable.setItems(creepingGameApp.getAnts());
+        this.creepingGameApp.setAnimationSpeed((int)speedSlider.getValue());
     }
 
     public void appStateChange() {
         CreepingGameApp.State state = creepingGameApp.getAppState();
-        if (state == CreepingGameApp.State.PLAYING || state == CreepingGameApp.State.PAUSED) {
-            startAndSkipButton.setDisable(false);
-            startAndSkipButton.setText("跳过动画");
-        } else if (state == CreepingGameApp.State.IDLE){
-            startAndSkipButton.setDisable(false);
-            startAndSkipButton.setText("开始");
-        } else{
-            startAndSkipButton.setDisable(true);
+        switch (state) {
+            case PLAYING:
+            case PAUSED:
+                startAndSkipButton.setDisable(false);
+                startAndSkipButton.setText("跳过动画");
+                break;
+            case IDLE:
+                startAndSkipButton.setDisable(false);
+                startAndSkipButton.setText("开始");
+                break;
+            default:
+                startAndSkipButton.setDisable(true);
+                break;
         }
 
-        if (state == CreepingGameApp.State.PLAYING) {
-            playAndPauseButton.setDisable(false);
-            playAndPauseButton.setText("暂停");
-        } else if (state == CreepingGameApp.State.PAUSED) {
-            playAndPauseButton.setDisable(false);
-            playAndPauseButton.setText("播放");
-        } else {
-            playAndPauseButton.setDisable(true);
+        switch (state) {
+            case PLAYING:
+                playAndPauseButton.setDisable(false);
+                playAndPauseButton.setText("暂停");
+                break;
+            case PAUSED:
+                playAndPauseButton.setDisable(false);
+                playAndPauseButton.setText("播放");
+                break;
+            default:
+                playAndPauseButton.setDisable(true);
+                break;
         }
 
-        if (state == CreepingGameApp.State.PAUSED || state == CreepingGameApp.State.PLAYING) {
-            nextConditionButton.setDisable(false);
-        } else {
-            nextConditionButton.setDisable(true);
+        switch (state) {
+            case PAUSED:
+            case PLAYING:
+                nextConditionButton.setDisable(false);
+                break;
+            default:
+                nextConditionButton.setDisable(true);
+                break;
         }
 
-        if(state == CreepingGameApp.State.IDLE) {
-            setDefaultButton.setDisable(false);
-            commitButton.setDisable(false);
-        } else {
-            setDefaultButton.setDisable(true);
-            commitButton.setDisable(true);
+        switch (state) {
+            case IDLE:
+                setDefaultButton.setDisable(false);
+                commitButton.setDisable(false);
+                break;
+            default:
+                setDefaultButton.setDisable(true);
+                commitButton.setDisable(true);
+                break;
         }
     }
 }

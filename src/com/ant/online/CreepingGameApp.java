@@ -26,14 +26,17 @@ public class CreepingGameApp extends Application {
     private BorderPane rootLayout;
 
     private int velocity = 5;
+    private int animationSpeed = 10;
+
     private Stick stick;
     private ObservableList<Ant> ants = FXCollections.observableArrayList();
     private List<Ant> initAnts = new ArrayList<>();
     private RootLayoutController rootLayoutController;
-
     private CreepingGame currentCreepingGame = null;
+
     private PlayRoom currentPlayingRoom = null;
     private Thread animateThread = null;
+
 
     public enum State {
         IDLE, STOPPING, PAUSED, PLAYING, CHANGING
@@ -76,9 +79,6 @@ public class CreepingGameApp extends Application {
 
         setAppState(State.IDLE);
 
-        initScreen();
-
-        initUserPanel();
     }
 
     public void setDefaultInput() {
@@ -86,7 +86,7 @@ public class CreepingGameApp extends Application {
         // Add som sample data
         this.stick = new Stick(300);
         this.initAnts.clear();
-        this.initAnts.add(new Ant(0, velocity));
+        this.initAnts.add(new Ant(30, velocity));
         this.initAnts.add(new Ant(80, velocity));
         this.initAnts.add(new Ant(110, velocity));
         this.initAnts.add(new Ant(160, velocity));
@@ -108,6 +108,7 @@ public class CreepingGameApp extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("online ant");
         this.primaryStage.getIcons().add(new Image("file:resources/images/ant_32.png"));
+        this.primaryStage.setOnCloseRequest(event -> this.setAppState(State.IDLE));
     }
 
     /**
@@ -124,21 +125,11 @@ public class CreepingGameApp extends Application {
 
             rootLayoutController = loader.getController();
             rootLayoutController.setCreepingGameApp(this);
-
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    private void initScreen() {
-        // TODO
-    }
-
-    private void initUserPanel() {
-        // TODO
-    }
-
 
     public List<Ant> getInitAnts() {
         return initAnts;
@@ -150,8 +141,8 @@ public class CreepingGameApp extends Application {
 
     public void startPlay() {
         ants.clear();
-        for (int i=0;i<this.initAnts.size();i++) {
-            ants.add(new Ant(initAnts.get(i)));
+        for (Ant initAnt : this.initAnts) {
+            ants.add(new Ant(initAnt));
         }
         this.currentPlayingRoom = new PlayRoom(this.getAnts(), this.getStick());
         this.nextGame();
@@ -165,23 +156,10 @@ public class CreepingGameApp extends Application {
         if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
             if (currentPlayingRoom.hasNext()) {
                 this.currentCreepingGame = this.currentPlayingRoom.next();
+                Platform.runLater(() -> rootLayoutController.gameInit());
             } else {
                 return false;
             }
-        }
-        return true;
-    }
-
-    public boolean nextTick() {
-        assert this.appState == State.PLAYING || this.appState == State.PAUSED;
-        if (currentCreepingGame == null || currentCreepingGame.isGameOver()) {
-            return false;
-        }
-        try {
-            currentCreepingGame.nextTick();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
         return true;
     }
@@ -208,5 +186,13 @@ public class CreepingGameApp extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public int getAnimationSpeed() {
+        return animationSpeed;
+    }
+
+    public void setAnimationSpeed(int animationSpeed) {
+        this.animationSpeed = animationSpeed;
     }
 }
